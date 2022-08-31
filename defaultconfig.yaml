@@ -1,0 +1,8 @@
+---
+dynamoDbProd:
+    balanceTable: addressbalance
+    transactionsTable: addresstransactions
+
+dynamoDbStaging:
+    balanceTable: addressbalance
+    transactionsTable: addresstransactions
