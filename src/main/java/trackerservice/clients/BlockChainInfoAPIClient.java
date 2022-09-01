@@ -97,12 +97,16 @@ public class BlockChainInfoAPIClient implements BlockchainClient {
           JSONObject output = (JSONObject) outputs.get(outputIdx);
           Boolean notChangeAddress = (Boolean) output.get(OUTPUT_SPENT_RESPONSE_KEY);
           Long satoshisSent = (Long) output.get(OUTPUT_VALUE_RESPONSE_KEY);
+          Transaction currTransaction = new Transaction();
+
+          currTransaction.setSatoshisSent(satoshisSent);
+          currTransaction.setSatoshiFee(satoshiFee);
 
           if (notChangeAddress) {
-            Transaction currTransaction = new Transaction();
+
             currTransaction.setBlockchainApiOffset(currOffset + transactionIdx);
-            currTransaction.setSatoshisSent(satoshisSent);
-            currTransaction.setSatoshiFee();
+
+            currTransaction.
           }
         }
 

@@ -10,9 +10,9 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSortK
 public class Transaction {
   private String btcAddress;
   private int blockchainApiOffset;
-  private long satoshisSent;
-  private long satoshiFee;
-  private List<String> destinationAddresses;
+  private Long satoshisSent;
+  private Long satoshiFee;
+  private List<TransactionRecipient> recipients;
 
   @DynamoDbPartitionKey
   @DynamoDbAttribute("btc_address")
@@ -39,7 +39,7 @@ public class Transaction {
     return this.satoshisSent;
   }
 
-  public void setSatoshisSent(long satoshisSent) {
+  public void setSatoshisSent(Long satoshisSent) {
     this.satoshisSent = satoshisSent;
   }
 
@@ -48,16 +48,16 @@ public class Transaction {
     return this.satoshiFee;
   }
 
-  public void setSatoshiFee(long satoshiFee) {
+  public void setSatoshiFee(Long satoshiFee) {
     this.satoshiFee = satoshiFee;
   }
 
-  @DynamoDbAttribute("destination_address")
-  public List<String> getDestinationAddress() {
-    return this.destinationAddresses;
+  @DynamoDbAttribute("transaction_recipients")
+  public List<TransactionRecipient> getTransactionRecipients() {
+    return this.recipients;
   }
 
-  public void setDestinationAddress(List<String> destinationAddress) {
-    this.destinationAddresses = destinationAddress;
+  public void setTransactionRecipients(List<TransactionRecipient> recipients) {
+    this.recipients = recipients;
   }
 }
