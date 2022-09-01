@@ -23,6 +23,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import trackerservice.dbmodels.Transaction;
+import trackerservice.dbmodels.TransactionRecipient;
 
 @RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class BlockChainInfoAPIClient implements BlockchainClient {
@@ -42,6 +43,7 @@ public class BlockChainInfoAPIClient implements BlockchainClient {
   private static final String TRANSACTIONS_FEE_RESPONSE_KEY = "fee";
   private static final String OUTPUT_SPENT_RESPONSE_KEY = "spent";
   private static final String OUTPUT_VALUE_RESPONSE_KEY = "value";
+  private static final String OUTPUT_RECIPIENT_ADDRESS_RESPONSE_KEY = "address";
 
   @Override
   public Long getSatoshiBalance(String btcAddress) throws URISyntaxException, IOException {
@@ -69,24 +71,35 @@ public class BlockChainInfoAPIClient implements BlockchainClient {
         .setPath(String.format("%s/%s", RAW_ADDRESS_PATH, btcAddress));
 
     int currOffset = startOffset;
-    boolean gotAllTransactions = false;
+    List<Transaction> finalTransactions = new ArrayList<>();
 
     /*
       Each call returns up to 50 transactions by default. Keep calling the API until
       we get all the transactions starting from the current offset. When we get an empty
       response, we know we got all the transactions.
      */
-    while (!gotAllTransactions) {
+    while (true) {
       getTransactionsUriBuilder.addParameter(OFFSET_QUERY_PARAM, String.valueOf(currOffset));
       HttpGet httpGet = new HttpGet(getTransactionsUriBuilder.build());
       HttpResponse httpResponse = httpClient.execute(httpGet);
 
       JSONObject responseJson = (JSONObject)
           JSONValue.parse(EntityUtils.toString(httpResponse.getEntity()));
+
+
       JSONArray transactions = (JSONArray) responseJson.get(RAW_ADDR_TXS_RESPONSE_KEY);
+      if (transactions.isEmpty()) {
+        break;
+      }
 
       /*
-        For each transaction we get the
+        For each transaction we get the fee, and set the offset of that transaction
+        from the API response. The offset is needed so we don't re-read the same
+        transactions from the API. For example, if transactions 0, 1, 2, 3 are returned,
+        then the next time we call the API, we want to read from transaction 4 onwards.
+
+        We also get all the spent outputs for each transaction so that we can save
+        how much BTC was sent to each address.
        */
       for (int transactionIdx = 0;
           transactionIdx < transactions.size();
@@ -101,21 +114,27 @@ public class BlockChainInfoAPIClient implements BlockchainClient {
         currTransaction.setSatoshiFee(satoshiFee);
         currTransaction.setBlockchainApiOffset(currOffset + transactionIdx);
 
+        List<TransactionRecipient> recipients = new ArrayList<>();
         for (int outputIdx = 0; outputIdx < outputs.size(); outputIdx++) {
           JSONObject output = (JSONObject) outputs.get(outputIdx);
           Boolean notChangeAddress = (Boolean) output.get(OUTPUT_SPENT_RESPONSE_KEY);
 
           if (notChangeAddress) {
             Long satoshisSent = (Long) output.get(OUTPUT_VALUE_RESPONSE_KEY);
-            
+            String recipientAddress = (String) output.get(OUTPUT_RECIPIENT_ADDRESS_RESPONSE_KEY);
+            TransactionRecipient transactionRecipient = new TransactionRecipient();
+            transactionRecipient.setSatoshisSent(satoshisSent);
+            transactionRecipient.setRecipientAddress(recipientAddress);
 
-            currTransaction.
+            recipients.add(transactionRecipient);
           }
         }
-
+        finalTransactions.add(currTransaction);
+        currTransaction.setTransactionRecipients(recipients);
       }
-
       currOffset += transactions.size();
     }
+
+    return finalTransactions;
   }
 }
