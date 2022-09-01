@@ -70,7 +70,6 @@ public class BlockChainInfoAPIClient implements BlockchainClient {
 
     int currOffset = startOffset;
     boolean gotAllTransactions = false;
-    List<Transaction> transactions = new ArrayList<>();
 
     /*
       Each call returns up to 50 transactions by default. Keep calling the API until
@@ -86,6 +85,9 @@ public class BlockChainInfoAPIClient implements BlockchainClient {
           JSONValue.parse(EntityUtils.toString(httpResponse.getEntity()));
       JSONArray transactions = (JSONArray) responseJson.get(RAW_ADDR_TXS_RESPONSE_KEY);
 
+      /*
+        For each transaction we get the
+       */
       for (int transactionIdx = 0;
           transactionIdx < transactions.size();
           transactionIdx++) {
@@ -93,14 +95,19 @@ public class BlockChainInfoAPIClient implements BlockchainClient {
         JSONObject transaction = (JSONObject) transactions.get(transactionIdx);
         Long satoshiFee = (Long) transaction.get(TRANSACTIONS_FEE_RESPONSE_KEY);
         JSONArray outputs = (JSONArray) transaction.get(TRANSACTIONS_OUTPUTS_RESPONSE_KEY);
+        transaction.get()
+
+        Transaction currTransaction = new Transaction();
+        currTransaction.setSatoshiFee(satoshiFee);
+
         for (int outputIdx = 0; outputIdx < outputs.size(); outputIdx++) {
           JSONObject output = (JSONObject) outputs.get(outputIdx);
           Boolean notChangeAddress = (Boolean) output.get(OUTPUT_SPENT_RESPONSE_KEY);
           Long satoshisSent = (Long) output.get(OUTPUT_VALUE_RESPONSE_KEY);
-          Transaction currTransaction = new Transaction();
+
 
           currTransaction.setSatoshisSent(satoshisSent);
-          currTransaction.setSatoshiFee(satoshiFee);
+
 
           if (notChangeAddress) {
 
@@ -111,6 +118,8 @@ public class BlockChainInfoAPIClient implements BlockchainClient {
         }
 
       }
+
+      currOffset += transactions.size();
     }
   }
 }
