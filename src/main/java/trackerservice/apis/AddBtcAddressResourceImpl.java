@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
+import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
 import trackerservice.clients.BlockchainClient;
 import trackerservice.dbmodels.ApiOffset;
@@ -28,6 +29,16 @@ public class AddBtcAddressResourceImpl implements AddBtcAddressResource{
 
     private final BlockchainClient blockchainClient;
     private final DynamoDbTable<Balance> balanceDynamoDbTable;
+
+    /*
+        When we call the blockchain.info API for the transaction history of
+        an address, we can pass in a starting offset if we dont want to read the
+        history from the beggining.
+        The api offset table is used to store the offset of the last
+        transaction that we got from the blockchain.info API. For example
+        if we got transactions 0, 1, 2, 3, next time, we'd want to read starting
+        from offset 4.
+     */
     private final DynamoDbTable<ApiOffset> apiOffsetDynamoDbTable;
     private final DynamoDbTable<Transaction> transactionDynamoDbTable;
 
@@ -42,7 +53,18 @@ public class AddBtcAddressResourceImpl implements AddBtcAddressResource{
 
         try {
             Long satoshiBalance = blockchainClient.getSatoshiBalance(btcAddress);
-            
+            Balance currBalance = new Balance();
+            currBalance.setBalance(satoshiBalance);
+            currBalance.setBtcAddress(btcAddress);
+            balanceDynamoDbTable.putItem(currBalance);
+
+            /*
+                Get the offset we left off at last time we called the blockchain.info api so we know where to
+                start calling from next.
+             */
+            ApiOffset apiOffset =
+                    apiOffsetDynamoDbTable.getItem(Key.builder().partitionValue(btcAddress).build());
+
         } catch (URISyntaxException | IOException | DynamoDbException e) {
             log.error("Error adding address", e);
         }
