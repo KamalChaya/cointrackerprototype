@@ -5,8 +5,8 @@ import io.dropwizard.setup.Environment;
 import trackerservice.config.TrackerServiceConfig;
 
 public class TrackerServiceApp extends Application<TrackerServiceConfig> {
-    public static void main(String... args) {
-
+    public static void main(String... args) throws Exception {
+        new TrackerServiceApp().run(args);
     }
 
     @Override

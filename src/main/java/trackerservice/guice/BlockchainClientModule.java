@@ -11,19 +11,19 @@ import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyClientBuilder;
 import trackerservice.clients.BlockChainInfoAPIClient;
 import trackerservice.clients.BlockchainClient;
-import trackerservice.config.TrackerServiceConfiguration;
+import trackerservice.config.TrackerServiceConfig;
 
 @RequiredArgsConstructor
 public class BlockchainClientModule extends AbstractModule {
 
-  private final TrackerServiceConfiguration config;
+  private final TrackerServiceConfig config;
   private final Environment environment;
 
   @Singleton
   @Provides
   public HttpClient getHttpClient() {
     return new HttpClientBuilder(environment)
-        .using(config.getHtpClientConfiguration())
+        .using(config.getHttpClient())
         .build(environment.getName());
   }
 
