@@ -95,23 +95,19 @@ public class BlockChainInfoAPIClient implements BlockchainClient {
         JSONObject transaction = (JSONObject) transactions.get(transactionIdx);
         Long satoshiFee = (Long) transaction.get(TRANSACTIONS_FEE_RESPONSE_KEY);
         JSONArray outputs = (JSONArray) transaction.get(TRANSACTIONS_OUTPUTS_RESPONSE_KEY);
-        transaction.get()
 
         Transaction currTransaction = new Transaction();
+        currTransaction.setBtcAddress(btcAddress);
         currTransaction.setSatoshiFee(satoshiFee);
+        currTransaction.setBlockchainApiOffset(currOffset + transactionIdx);
 
         for (int outputIdx = 0; outputIdx < outputs.size(); outputIdx++) {
           JSONObject output = (JSONObject) outputs.get(outputIdx);
           Boolean notChangeAddress = (Boolean) output.get(OUTPUT_SPENT_RESPONSE_KEY);
-          Long satoshisSent = (Long) output.get(OUTPUT_VALUE_RESPONSE_KEY);
-
-
-          currTransaction.setSatoshisSent(satoshisSent);
-
 
           if (notChangeAddress) {
-
-            currTransaction.setBlockchainApiOffset(currOffset + transactionIdx);
+            Long satoshisSent = (Long) output.get(OUTPUT_VALUE_RESPONSE_KEY);
+            
 
             currTransaction.
           }
