@@ -2,3 +2,6 @@
 dynamoDbProd:
     balanceTable: addressbalance
     transactionsTable: addresstransactions
+
+httpClient:
+    timeout: 9s

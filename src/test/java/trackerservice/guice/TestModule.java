@@ -21,7 +21,9 @@ import org.mockito.Mockito;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import trackerservice.clients.BlockChainInfoAPIClient;
 import trackerservice.clients.BlockchainClient;
+import trackerservice.dbmodels.ApiOffset;
 import trackerservice.dbmodels.Balance;
+import trackerservice.dbmodels.Transaction;
 
 @SuppressWarnings("unchecked")
 public class TestModule extends AbstractModule {
@@ -48,6 +50,10 @@ public class TestModule extends AbstractModule {
   public void configure() {
     bind(new TypeLiteral<DynamoDbTable<Balance>>() {})
         .toInstance((DynamoDbTable<Balance>) Mockito.mock(DynamoDbTable.class));
+    bind(new TypeLiteral<DynamoDbTable<Transaction>>() {})
+            .toInstance((DynamoDbTable<Transaction>) Mockito.mock(DynamoDbTable.class));
+    bind(new TypeLiteral<DynamoDbTable<ApiOffset>>() {})
+            .toInstance((DynamoDbTable<ApiOffset>) Mockito.mock(DynamoDbTable.class));
   }
 
   private HttpResponse createMockResponse(String jsonString) throws IOException {

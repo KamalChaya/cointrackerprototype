@@ -1,5 +1,5 @@
 plugins {
-    id 'io.franzbecker.gradle-lombok' version '5.0.0'
+    //id 'io.franzbecker.gradle-lombok' version '5.0.0'
     id 'java'
     id 'application'
 }
@@ -20,7 +20,6 @@ run {
 }
 
 dependencies {
-    //implementation "com.squarespace.jersey2-guice:jersey2-guice-impl:1.0.6"
     implementation platform('software.amazon.awssdk:bom:2.17.230')
     implementation "software.amazon.awssdk:dynamodb"
     implementation "software.amazon.awssdk:dynamodb-enhanced"
@@ -29,7 +28,8 @@ dependencies {
     implementation "com.squareup.okhttp3:okhttp:4.10.0"
     implementation "io.dropwizard:dropwizard-core:2.1.1"
     implementation "io.dropwizard:dropwizard-client:2.1.1"
-
+    compileOnly 'org.projectlombok:lombok:1.18.24'
+    annotationProcessor 'org.projectlombok:lombok:1.18.24'
     implementation "org.apache.commons:commons-lang3:3.12.0"
 
     implementation "com.datastax.cassandra:cassandra-driver-core:3.1.0"
